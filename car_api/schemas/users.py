@@ -28,5 +28,5 @@ class UserUpdateSchema(
 
 class UserListPublicSchema(
     BaseModel
-):  # -> Representa a estrutura de dados para um usuário público, ou seja, vai retornar essa lista para o usuário
+):  # -> Representa a estrutura de dados para um usuário público, ou seja, vai retornar essa lista de usuário
     users: List[UserPublicSchema]
