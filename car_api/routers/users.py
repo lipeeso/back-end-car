@@ -29,22 +29,4 @@ async def create_user(user: UserSchema):
     response_model=UserListPublicSchema
 )
 async def list_users():
-     return {
-        'users': [
-            {
-                'id': 1,
-                'username': 'pycodebr',
-                'email': 'pycodebr@gmail.com',
-            },
-            {
-                'id': 2,
-                'username': 'joao',
-                'email': 'joao@gmail.com',
-            },
-            {
-                'id': 3,
-                'username': 'mario',
-                'email': 'mario@gmail.com',
-            },
-        ]
-    }
+     return {"users": USERS} # -> Retorna a lista de usuários, sem as senhas, pois estamos usando o UserListPublicSchema como resposta
