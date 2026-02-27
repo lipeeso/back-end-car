@@ -22,7 +22,6 @@ async def create_user(user: UserSchema):
     return user_with_id # -> Retorna o usuário criado, sem a senha, pois estamos usando o UserPublicSchema como resposta 
 
 
-
 @router.get(
     path='/',
     status_code=status.HTTP_200_OK, 
