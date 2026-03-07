@@ -1,4 +1,5 @@
-'''Configurações globais'''
+'''Configurações globais
+OBS -> UTF-8 é para não quebrar em caracteres especiais'''
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
