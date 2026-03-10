@@ -9,5 +9,3 @@ class Settings(BaseSettings):   #-> Vai carregar todas as variaveis de ambientes
     )
 
     DATABASE_URL: str
-
-
