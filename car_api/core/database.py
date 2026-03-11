@@ -4,6 +4,7 @@ from car_api.core.settings import Settings
 
 
 engine = create_async_engine(Settings().DATABASE_URL) #-> Cria a engine de conexão com o banco de dados usando a URL fornecida nas configurações
+
 '''
 expire_on_commit=False -> Impede que a conexão expire após o commit'''
 
