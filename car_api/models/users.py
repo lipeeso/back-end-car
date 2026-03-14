@@ -12,9 +12,9 @@ class User(Base):
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str] #-> não tem uma propriedade especial no campo então pode deixar assim
     email: Mapped[str] = mapped_column(unique=True)
-    update_at = Mapped[datetime] = mapped_column(
+    update_at : Mapped[datetime] = mapped_column(
         onupdate=func.now(), server_default=func.now()
     )
-    created_at = Mapped[datetime] = mapped_column(
+    created_at : Mapped[datetime] = mapped_column(
         server_default=func.now()
     )
