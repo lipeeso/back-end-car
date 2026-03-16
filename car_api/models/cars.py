@@ -12,10 +12,14 @@ class Brand(Base):
     name: Mapped[str] = mapped_column(String(50),unique=True) #-> define o limite de caracter a 50 e o unique para não permitir repetição
     is_active: Mapped[bool] = mapped_column(default=True) #-> define o valor padrão como True
     description: Mapped[Optional[str]] = mapped_column(Text, default=None) #-> Text não tem limite de caracteres, 
-    
+
     updated_at: Mapped[datetime] = mapped_column(
         onupdate=func.now(), server_default=func.now()
     )
     created_at: Mapped[datetime] = mapped_column(
         server_default=func.now()
     )
+
+class Car(Base):
+    __tablename__="cars"
+
