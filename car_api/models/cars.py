@@ -57,6 +57,13 @@ class Car(Base):
     description: Mapped[Optional[str]] = mapped_column(Text, default=None)
     is_available: Mapped[bool] = mapped_column(default=True)
 
+    brand_id: Mapped[int] = mapped_column(
+        ForeignKey('brands.id')
+    ) #-> define a chave estrangeira para a tabela brands
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey('users.id')
+    ) #-> define a chave estrangeira para a tabela owners
+
     updated_at: Mapped[datetime] = mapped_column(
         onupdate=func.now(), server_default=func.now()
     )
@@ -64,3 +71,6 @@ class Car(Base):
         server_default=func.now()
     )
 
+    #Propriedades de relacionamento
+    brand: Mapped['Brand'] = relationship("Brand", back_populates="cars") #-> define o relacionamento com a tabela brands, e o back_populates para definir o nome do atributo na classe Brand
+    user: Mapped['User'] = relationship("User", back_populates="cars") #-> define o relacionamento com a tabela users, e o back_populates para definir o nome do atributo na classe User
