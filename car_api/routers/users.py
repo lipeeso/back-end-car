@@ -1,5 +1,7 @@
-from fastapi import APIRouter, status
-
+from fastapi import APIRouter, status, Depends
+from car_api.core.database import get_session
+from sqlalchemy.ext.asyncio import AsyncSession
+from car_api.models.users import User
 from car_api.schemas.users import (
     UserListPublicSchema, 
     UserSchema,
@@ -14,13 +16,23 @@ router = APIRouter()
 @router.post(
     path='/',
     status_code=status.HTTP_201_CREATED,
-    response_model=UserPublicSchema
+    response_model=UserPublicSchema,
+    summary='Create a new user'
 )
-async def create_user(user: UserSchema):
-    user_with_id = UserPublicSchema(**user.model_dump(), id=len(USERS) + 1) # -> Cria um novo usuário com um ID único, baseado no tamanho da lista de usuários
-    USERS.append(user_with_id) # -> Adiciona o novo usuário à lista de usuários 
-    return user_with_id # -> Retorna o usuário criado, sem a senha, pois estamos usando o UserPublicSchema como resposta 
-
+async def create_user(
+    user: UserSchema,
+    db: AsyncSession = Depends(get_session)
+):
+    db_user = User(
+        username=user.username,
+        password=user.password,
+        email=user.email
+    )
+    
+    db.add(db_user) # -> Adiciona o novo usuário à sessão do banco de dados apenas na memória, ainda não foi salvo no banco de dados
+    await db.commit() # -> Salva as alterações no banco de dados, ou seja,
+    await db.refresh(db_user) # -> Atualiza o objeto do usuário com os dados do banco de dados, incluindo o ID gerado automaticamente
+    return db_user # -> Retorna o usuário criado, sem a senha, pois estamos usando
 
 @router.get(
     path='/',
