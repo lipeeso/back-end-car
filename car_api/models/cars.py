@@ -3,10 +3,12 @@ from sqlalchemy import func, ForeignKey, String, Integer, Text, Numeric
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Optional
+from typing import TYPE_CHECKING, Optional, List
 from car_api.models import Base
 
 
+if TYPE_CHECKING:
+    from car_api.models import User
 
 class FuelType(str, Enum):
     GASOLINE = 'gasoline'
@@ -38,6 +40,8 @@ class Brand(Base):
     created_at: Mapped[datetime] = mapped_column(
         server_default=func.now()
     )
+
+    cars: Mapped[List['Car']] = relationship("Car", back_populates="brand") #-> define o relacionamento com a tabela cars, e o back_populates para definir o nome do atributo na classe Car
 
 class Car(Base):
     __tablename__="cars"
@@ -72,5 +76,8 @@ class Car(Base):
     )
 
     #Propriedades de relacionamento
+    '''
+    Facilita o acesso aos dados relacionados, permitindo que você acesse os dados da marca e do proprietário diretamente a partir do objeto Car, sem precisar fazer uma consulta separada para obter essas informações.
+    '''
     brand: Mapped['Brand'] = relationship("Brand", back_populates="cars") #-> define o relacionamento com a tabela brands, e o back_populates para definir o nome do atributo na classe Brand
-    user: Mapped['User'] = relationship("User", back_populates="cars") #-> define o relacionamento com a tabela users, e o back_populates para definir o nome do atributo na classe User
+    owner: Mapped['User'] = relationship("User", back_populates="cars") #-> define o relacionamento com a tabela users, e o back_populates para definir o nome do atributo na classe User

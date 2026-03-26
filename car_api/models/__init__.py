@@ -7,4 +7,6 @@ from car_api.models.users import User
 
 from car_api.models.cars import Brand
 
-__all__ = ['Base', 'User', 'Brand']
+from car_api.models.cars import Car
+
+__all__ = ['Base', 'User', 'Brand', 'Car']
