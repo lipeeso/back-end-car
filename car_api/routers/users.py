@@ -1,6 +1,7 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, HTTPException, Depends
 from car_api.core.database import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, exists
 from car_api.models.users import User
 from car_api.schemas.users import (
     UserListPublicSchema, 
@@ -23,16 +24,26 @@ async def create_user(
     user: UserSchema,
     db: AsyncSession = Depends(get_session)
 ):
-    db_user = User(
-        username=user.username,
-        password=user.password,
-        email=user.email
+    user_exists = await db.scalar(
+        select(exists().where(User.username == user.username or User.email == user.email))
     )
+
+    if user_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Username or email already exists'
+        )
     
-    db.add(db_user) # -> Adiciona o novo usuário à sessão do banco de dados apenas na memória, ainda não foi salvo no banco de dados
-    await db.commit() # -> Salva as alterações no banco de dados, ou seja,
-    await db.refresh(db_user) # -> Atualiza o objeto do usuário com os dados do banco de dados, incluindo o ID gerado automaticamente
-    return db_user # -> Retorna o usuário criado, sem a senha, pois estamos usando
+    new_user = User(
+        username = user.username,
+        password = user.password,
+        email = user.email
+    )
+
+    db.add(new_user)
+    await db.commit()
+    await db.refresh(new_user)
+    return new_user
 
 @router.get(
     path='/',
