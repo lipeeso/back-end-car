@@ -9,11 +9,11 @@ if TYPE_CHECKING:
     from car_api.models import Car
 
 class User(Base):
-    __tablename__ = 'users' # -> Nome da tabela que vai ser criado
+    __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(unique=True)
-    password: Mapped[str] #-> não tem uma propriedade especial no campo então pode deixar assim
+    password: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
     update_at : Mapped[datetime] = mapped_column(
         onupdate=func.now(), server_default=func.now()
