@@ -25,13 +25,21 @@ async def create_user(
     db: AsyncSession = Depends(get_session)
 ):
     user_exists = await db.scalar(
-        select(exists().where(User.username == user.username or User.email == user.email))
+        select(exists().where(User.username == user.username))
     )
 
     if user_exists:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Username or email already exists'
+        )
+    
+    email_exists = await db.scalar(select(exists().where(User.email == user.email)))
+
+    if email_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='email already exists'
         )
     
     new_user = User(
@@ -48,21 +56,32 @@ async def create_user(
 @router.get(
     path='/',
     status_code=status.HTTP_200_OK, 
-    response_model=UserListPublicSchema
+    response_model=UserListPublicSchema,
+    summary='List all users'
 )
-async def list_users():
-     return {"users": USERS} # -> Retorna a lista de usuários, sem as senhas, pois estamos usando o UserListPublicSchema como resposta
+async def list_users(
+    db: AsyncSession = Depends(get_session)
+):  
+    
+    users = await db.execute(select(User))
+    users_list = users.scalars().all()
 
-'''Sempre ou ter que sobrescrever o usuário inteiro, ou seja, enviar todos os campos, mesmo os que não foram alterados, ou podemos criar um endpoint para atualizar apenas um campo específico, por exemplo, apenas o email.'''
+    if not users_list:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='No users found'
+        )
+    
+    return {"users": users_list} 
+
 @router.put(
     path='/{user_id}',
     status_code=status.HTTP_201_CREATED,
-    response_model=UserPublicSchema
+    response_model=UserPublicSchema,
 )
 async def update_user(user_id: int, user: UserSchema):
-    user_with_id = UserPublicSchema(**user.model_dump(), id=user_id) # -> Cria um novo usuário com o ID fornecido e os dados do usuário atualizado
-    USERS[user_id - 1] = user_with_id
-    return user_with_id # -> Retorna o usuário atualizado, sem a senha, pois estamos usando o UserPublicSchema como resposta
+    pass
+    
 
 @router.delete(
     path='/{user_id}',
