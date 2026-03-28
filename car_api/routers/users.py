@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from car_api.core.database import get_session
+from car_api.core.security import get_password_hash
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, exists
 from car_api.models.users import User
@@ -31,7 +32,7 @@ async def create_user(
     if user_exists:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Username or email already exists'
+            detail='Username already exists'
         )
     
     email_exists = await db.scalar(select(exists().where(User.email == user.email)))
@@ -39,12 +40,12 @@ async def create_user(
     if email_exists:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail='email already exists'
+            detail='Email already exists'
         )
     
     new_user = User(
         username = user.username,
-        password = user.password,
+        password = get_password_hash(user.password),
         email = user.email
     )
 
@@ -79,7 +80,11 @@ async def list_users(
     status_code=status.HTTP_201_CREATED,
     response_model=UserPublicSchema,
 )
-async def update_user(user_id: int, user: UserSchema):
+async def update_user(
+    user_id: int,
+    user: UserSchema,
+    db: AsyncSession = Depends(get_session)
+):
     pass
     
 
