@@ -90,8 +90,23 @@ async def update_user(
 
 @router.delete(
     path='/{user_id}',
-    status_code=status.HTTP_204_NO_CONTENT  
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary='Delete a user by ID'  
 )
-async def delete_user(user_id: int):
-    del USERS[user_id - 1]
-    return None # -> Retorna None, pois o status code 204 indica que a operação foi bem-sucedida, mas não há conteúdo para retornar
+async def delete_user(
+    user_id: int,
+    db: AsyncSession = Depends(get_session)
+):
+    user = await db.get(User, user_id) #-> Obtem o objeto do usuário com o ID fornecido
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User not found'
+        )   
+    
+    await db.delete(user) #-> Deleta o usuário do banco de dados
+    await db.commit() #-> Confirma a transação de exclusão no banco de dados
+    return None
+  
+  
