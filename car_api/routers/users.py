@@ -12,7 +12,6 @@ from car_api.schemas.users import (
     UserPublicSchema,
 )
 
-from car_api.db import USERS
 
 router = APIRouter()
 
@@ -68,7 +67,7 @@ async def list_users(
     
    query = select(User)
    result = await db.execute(query)
-   users = result.scalars().all()
+   users = result.scalars().all()   #-> All retorna uma lista de objetos do tipo User, e scalars() extrai apenas os objetos User da consulta SQLAlchemy.
 
    return {
        "users": users
@@ -126,8 +125,8 @@ async def delete_user(
             detail='User not found'
         )   
     
-    await db.delete(user) #-> Deleta o usuário do banco de dados
-    await db.commit() #-> Confirma a transação de exclusão no banco de dados
+    await db.delete(user)
+    await db.commit() 
     return None
   
   
