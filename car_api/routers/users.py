@@ -1,3 +1,5 @@
+from unittest import result
+
 from fastapi import APIRouter, status, HTTPException, Depends
 from car_api.core.database import get_session
 from car_api.core.security import get_password_hash
@@ -64,16 +66,34 @@ async def list_users(
     db: AsyncSession = Depends(get_session)
 ):  
     
-    users = await db.execute(select(User))
-    users_list = users.scalars().all()
+   query = select(User)
+   result = await db.execute(query)
+   users = result.scalars().all()
 
-    if not users_list:
+   return {
+       "users": users
+   }  
+
+
+@router.get(
+    path='/{user_id}',
+    status_code=status.HTTP_200_OK,
+    response_model=UserPublicSchema,
+    summary='Get a user by ID'
+)
+async def get_user(
+    user_id: int,
+    db: AsyncSession = Depends(get_session)
+):
+    user = await db.get(User, user_id)
+
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail='No users found'
+            detail='User not found'
         )
     
-    return {"users": users_list} 
+    return user
 
 @router.put(
     path='/{user_id}',
@@ -85,6 +105,7 @@ async def update_user(
     user: UserSchema,
     db: AsyncSession = Depends(get_session)
 ):
+    
     pass
     
 
