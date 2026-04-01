@@ -1,5 +1,5 @@
 from unittest import result
-
+from typing import Optional
 from fastapi import APIRouter, status, HTTPException, Query, Depends
 from car_api.core.database import get_session
 from car_api.core.security import get_password_hash
@@ -63,12 +63,20 @@ async def create_user(
 )
 async def list_users(
     offset: int = Query(0, ge=0, description='Number of items to skip'),
-    limit: int = Query(5, ge=1, le=5, description='Maximum number of items to return'),
+    limit: int = Query(100, ge=1, le=100, description='Maximum number of items to return'),
+    search: Optional[str] = Query(None, description='Search term for username or email'),
     db: AsyncSession = Depends(get_session)
     
 ):  
     
    query = select(User)
+
+   if search:
+       search_filter = f"%{search}%"
+       query = query.where(
+           User.username.ilike(search_filter) | User.email.ilike(search_filter)
+       )
+
    query = query.offset(offset).limit(limit)  #-> Aplica o deslocamento e o limite à consulta SQLAlchemy.
    result = await db.execute(query)
    users = result.scalars().all()   #-> All retorna uma lista de objetos do tipo User, e scalars() extrai apenas os objetos User da consulta SQLAlchemy.
