@@ -1,6 +1,6 @@
 from unittest import result
 
-from fastapi import APIRouter, status, HTTPException, Depends
+from fastapi import APIRouter, status, HTTPException, Query, Depends
 from car_api.core.database import get_session
 from car_api.core.security import get_password_hash
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -62,15 +62,21 @@ async def create_user(
     summary='List all users'
 )
 async def list_users(
+    offset: int = Query(0, ge=0, description='Number of items to skip'),
+    limit: int = Query(5, ge=1, le=5, description='Maximum number of items to return'),
     db: AsyncSession = Depends(get_session)
+    
 ):  
     
    query = select(User)
+   query = query.offset(offset).limit(limit)  #-> Aplica o deslocamento e o limite à consulta SQLAlchemy.
    result = await db.execute(query)
    users = result.scalars().all()   #-> All retorna uma lista de objetos do tipo User, e scalars() extrai apenas os objetos User da consulta SQLAlchemy.
 
    return {
-       "users": users
+       "users": users,
+       "offset": offset,
+        "limit": limit,
    }  
 
 
