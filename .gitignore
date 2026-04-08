@@ -65,3 +65,4 @@ logs/
 # Database
 *.sqlite3
 *.db
+.codex
