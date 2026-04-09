@@ -10,6 +10,7 @@ from car_api.schemas.users import (
     UserListPublicSchema, 
     UserSchema,
     UserPublicSchema,
+    UserUpdateSchema
 )
 
 
@@ -112,15 +113,56 @@ async def get_user(
     path='/{user_id}',
     status_code=status.HTTP_201_CREATED,
     response_model=UserPublicSchema,
+    summary='Update a user by ID'
 )
 async def update_user(
     user_id: int,
-    user: UserSchema,
+    user_update: UserUpdateSchema,
     db: AsyncSession = Depends(get_session)
 ):
     
-    pass
+    user = await db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User not found'
+        )
     
+    update_data = user_update.model_dump(exclude_unset=True)    #-> Transforma o objeto UserUpdateSchema em um dicionário, excluindo os campos que não foram definidos (unset). 
+    
+    if 'username' in update_data and update_data['username'] != user.username:
+        user_exists = await db.scalar(
+            select(exists().where((User.username == update_data['username']) & (User.id != user_id)))
+        )
+        if user_exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Username already exists'
+            )
+
+    if 'email' in update_data and update_data['email'] != user.email:
+        email_exists = await db.scalar(
+            select(exists().where((User.email == update_data['email']) & (User.id != user_id)))
+            
+        )
+        if email_exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Email already exists'
+            )
+
+    if 'password' in update_data:
+        update_data['password'] = get_password_hash(update_data['password'])
+    
+    for field, value in update_data.items():
+        setattr(user, field, value)   #-> Atualiza os campos do objeto User com os valores fornecidos na solicitação de atualização.
+    
+    await db.commit()  
+    await db.refresh(user)
+
+    return user
+
 
 @router.delete(
     path='/{user_id}',
