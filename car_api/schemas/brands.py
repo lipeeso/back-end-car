@@ -28,8 +28,9 @@ class BrandUpdateSchema(BaseModel):
             raise ValueError("O nome da marca deve conter pelo menos 2 caracteres.")
         return value.strip()
         
-
 class BrandPublicSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int 
     name: str
     is_active: bool 
