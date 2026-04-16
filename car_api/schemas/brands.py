@@ -12,8 +12,8 @@ class BrandSchema(BaseModel):
 
     @field_validator("name")
     def name_min_length(cls, value):
-        if len(value.strip()) < 2:
-            raise ValueError("O nome da marca deve conter pelo menos 2 caracteres.")
+        if len(value.strip()) < 3:
+            raise ValueError("Brand name must be at least 3 characters long")
         return value.strip()
 
 
@@ -24,8 +24,8 @@ class BrandUpdateSchema(BaseModel):
 
     @field_validator("name")
     def name_min_length(cls, value):
-        if len(value.strip()) < 2:
-            raise ValueError("O nome da marca deve conter pelo menos 2 caracteres.")
+        if len(value.strip()) < 3:
+            raise ValueError("Brand name must be at least 3 characters long")
         return value.strip()
         
 class BrandPublicSchema(BaseModel):
