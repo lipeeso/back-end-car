@@ -46,6 +46,26 @@ async def create_brand(
 
     return db_brand
 
+@router.get(
+    path='/{brand_id}',
+    status_code=status.HTTP_200_OK,
+    response_model=BrandPublicSchema,
+    summary='Get a brand by ID'
+)
+async def get_brand(
+    brand_id: int,
+    db: AsyncSession = Depends(get_session)
+):
+    brand = await db.get(Brand, brand_id)
+
+    if not brand:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Brand not found'
+        )
+
+    return brand
+
 
 @router.delete(
     path='/{brand_id}',
