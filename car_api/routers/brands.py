@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status, HTTPException, Query, Depends
+from typing import List, Optional
 from car_api.core.database import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from car_api.models.cars import Brand, Car
@@ -9,8 +10,6 @@ from car_api.schemas.brands import(
     BrandSchema,
     BrandUpdateSchema
 )
-
-
 
 router = APIRouter()
 
@@ -45,6 +44,37 @@ async def create_brand(
     await db.refresh(db_brand)
 
     return db_brand
+
+
+@router.get(
+    path="/",
+    status_code=status.HTTP_200_OK,
+    response_model=BrandListPublicSchema,
+    summary="Get a list of all brands",
+)
+async def list_brands(
+    offset: int = Query(0, ge=0, description="Number of items to skip"),
+    limit: int = Query(100, ge=1, le=100, description="Maximum number of items"),
+    search: Optional[str] = Query(None, description="Search term for brand name"),
+    is_active: Optional[bool] = Query(None, description="Filter by active status"),
+    db: AsyncSession = Depends(get_session),
+):
+
+    query = select(Brand)
+
+    if search:
+        search_filter = f"%{search}%"
+        query = query.where(Brand.name.ilike(search_filter))
+
+    if is_active is not None:
+        query = query.where(Brand.is_active == is_active)
+
+    query.offset(offset).limit(limit)
+    result = await db.execute(query)
+    brands = result.scalars().all()
+
+    return {"brands": brands, "offset": offset, "limit": limit}
+
 
 @router.get(
     path='/{brand_id}',
@@ -99,4 +129,3 @@ async def delete_brand(
     await db.commit()
 
     return None
-
