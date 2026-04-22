@@ -96,6 +96,53 @@ async def get_brand(
 
     return brand
 
+@router.put(
+    path='/{brand_id}',
+    status_code=status.HTTP_200_OK,
+    response_model=BrandPublicSchema,
+    summary='Update a brand by ID'
+)
+async def update_brand(
+    brand_id: int,
+    brand_update: BrandUpdateSchema,
+    db: AsyncSession = Depends(get_session)
+):
+    brand = await db.get(Brand, brand_id)
+
+    if not brand:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Brand not found'
+        )
+    
+    brand_update = brand_update.model_dump(exclude_unset=True)
+
+    if "name" in brand_update:
+        name_exists = await db.scalar(
+            select(
+                exists().where((Brand.name == brand_update['name']) & (Brand.id != brand_id))
+            )
+        )
+
+        if name_exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Brand name already exists'
+            )
+        
+    if "description" in brand_update:
+        brand.description = brand_update["description"]
+
+    if "is_active" in brand_update:
+        brand.is_active = brand_update["is_active"]
+
+    for key, value in brand_update.items():
+        setattr(brand, key, value)
+    
+    await db.commit()
+    await db.refresh(brand)
+    return brand
+
 
 @router.delete(
     path='/{brand_id}',

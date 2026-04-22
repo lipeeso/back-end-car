@@ -145,7 +145,7 @@ async def update_user(
         email_exists = await db.scalar(
             select(exists().where((User.email == update_data['email']) & (User.id != user_id)))
             
-        )
+        ) 
         if email_exists:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
