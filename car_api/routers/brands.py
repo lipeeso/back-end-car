@@ -98,7 +98,7 @@ async def get_brand(
 
 @router.put(
     path='/{brand_id}',
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     response_model=BrandPublicSchema,
     summary='Update a brand by ID'
 )
