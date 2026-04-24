@@ -98,7 +98,7 @@ async def get_brand(
 
 @router.put(
     path='/{brand_id}',
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     response_model=BrandPublicSchema,
     summary='Update a brand by ID'
 )
@@ -117,10 +117,12 @@ async def update_brand(
     
     brand_update = brand_update.model_dump(exclude_unset=True)
 
-    if "name" in brand_update:
+    if "name" in brand_update and brand_update["name"] != brand.name:
         name_exists = await db.scalar(
-            select(
-                exists().where((Brand.name == brand_update['name']) & (Brand.id != brand_id))
+            select(exists().where(
+                (Brand.name == brand_update['name'])
+                & 
+                (Brand.id != brand_id))
             )
         )
 
