@@ -25,8 +25,32 @@ class CarSchema(BaseModel):
         if len(value.strip()) < 3:
             raise ValueError("Model name must be at least 3 characters long")
         return value.strip()
+    
+    @field_validator("color")
+    def color_min_length(cls, value):
+        if len(value.strip()) < 2:
+            raise ValueError("Color name must be at least 2 characters long")
+        return value.strip()
+    
+    @field_validator("plate")
+    def plate_format(cls, value):
+        plate = value.strip().upper()
+        if len(plate) < 7 or len(plate) > 10:
+            raise ValueError("Plate must have between 7 and 10 characters.")
+        return plate
 
-
+    @field_validator("factory_year", "model_year")
+    def year_validation(cls, value):
+        if value < 1900 or value > 2027:
+            raise ValueError("Year between 1900 and 2027")
+        return value
+    
+    @field_validator("price")
+    def price_validation(cls, value):
+        if value <=  0:
+            raise ValueError("Price equals 0")
+        return value
+        
 class CarUpdateSchema(BaseModel):
     model: Optional[str] = None
     factory_year: Optional[int] = None
@@ -46,6 +70,31 @@ class CarUpdateSchema(BaseModel):
         if len(value.strip()) < 3:
             raise ValueError("Model name must be at least 3 characters long")
         return value.strip()
+    
+    @field_validator("color")
+    def color_min_length(cls, value):
+        if len(value.strip()) < 2:
+            raise ValueError("Color name must be at least 2 characters long")
+        return value.strip()
+    
+    @field_validator("plate")
+    def plate_format(cls, value):
+        plate = value.strip().upper()
+        if len(plate) < 7 or len(plate) > 10:
+            raise ValueError("Plate must have between 7 and 10 characters.")
+        return plate
+
+    @field_validator("factory_year", "model_year")
+    def year_validation(cls, value):
+        if value < 1900 or value > 2027:
+            raise ValueError("Year between 1900 and 2027")
+        return value
+    
+    @field_validator("price")
+    def price_validation(cls, value):
+        if value <=  0:
+            raise ValueError("Price equals 0")
+        return value
 
 class CarPublicSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
