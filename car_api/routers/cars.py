@@ -124,7 +124,7 @@ async def delete_car(
 ):
     car = await db.get(Car, car_id)
 
-    if car is None:
+    if not car:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Car not found"
