@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, HTTPException, Query, Depends
 from car_api.core.database import get_session   
-from sqlalchemy.ext.asyncio import AsyncSession 
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List, Optional 
 from car_api.models.cars import Car, Brand
 from car_api.models.users import User
 from sqlalchemy import select, exists, func
@@ -111,6 +112,43 @@ async def get_car(
         )
 
     return car
+
+
+@router.get(
+    path='/',
+    status_code=status.HTTP_200_OK,
+    response_model=CarListSchema,
+    summary='Get a list of cars'
+)
+async def list_cars(
+    db: AsyncSession = Depends(get_session),
+    offset: int = Query(0, ge=0, description="Number of items to skip"),
+    limit: int = Query(10, ge=1, le=100, description="Maximum number of items to return"),
+    search: Optional[str] = Query(None, description="Search term for model or color"),
+    is_active: Optional[bool] = Query(None, description="Filter by availability")
+):
+    query = select(Car).options(selectinload(Car.brand), selectinload(Car.owner))
+
+    query = query.offset(offset).limit(limit)
+
+    if search:
+        search_car_model = f"%{search}%"
+        query = query.where(
+            (Car.model.ilike(search_car_model)) | (Car.plate.ilike(search_car_model))
+        )
+
+    if is_active is not None:
+        query = query.where(Car.is_available == is_active)
+
+    result = await db.execute(query)
+
+    cars = result.scalars().all()
+
+    return {
+        "cars": cars,
+        "offset": offset,
+        "limit": limit,
+    }
 
 
 @router.delete(
