@@ -1,17 +1,19 @@
 from fastapi import APIRouter, status, HTTPException, Query, Depends
-from car_api.core.database import get_session   
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional 
-from car_api.models.cars import Car, Brand
-from car_api.models.users import User
 from sqlalchemy import select, exists, func
 from sqlalchemy.orm import selectinload #-> Faz carregamento de dados de outras tabelas
+from typing import List, Optional
+
+from car_api.core.database import get_session   
+from car_api.models.cars import Car, Brand, FuelType, TransmissionType
+from car_api.models.users import User
 from car_api.schemas.cars import (
     CarListSchema,
     CarPublicSchema,
     CarSchema,
     CarUpdateSchema
 )   
+
 
 router = APIRouter()
 
@@ -125,20 +127,45 @@ async def list_cars(
     offset: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(10, ge=1, le=100, description="Maximum number of items to return"),
     search: Optional[str] = Query(None, description="Search term for model or color"),
-    is_active: Optional[bool] = Query(None, description="Filter by availability")
+    is_available: Optional[bool] = Query(None, description="Filter by availability"),
+    brand_id: Optional[int] = Query(None, description="Filter by brand ID"),
+    owner_id: Optional[int] = Query(None, description="Filter by owner ID"),
+    fuel_type: Optional[FuelType] = Query(None, description="Filter by fuel type"),
+    transmission_type: Optional[TransmissionType] = Query(None, description="Filter by transmission type"),
+    price_min: Optional[float] = Query(None, ge=0, description="Minimum price"),
+    price_max: Optional[float] = Query(None, ge=0, description="Maximum price"),
 ):
     query = select(Car).options(selectinload(Car.brand), selectinload(Car.owner))
 
     query = query.offset(offset).limit(limit)
 
+    if is_available is not None:
+        query = query.where(Car.is_available == is_available)
+
+    if brand_id is not None:
+        query = query.where(Car.brand_id == brand_id)
+
+    if owner_id is not None:
+        query = query.where(Car.owner_id == owner_id)
+
+    if fuel_type is not None:
+        query = query.where(Car.fuel_type == fuel_type)
+    
+    if transmission_type is not None:
+        query = query.where(Car.transmission == transmission_type)
+
     if search:
-        search_car_model = f"%{search}%"
+        search_filter = f"%{search}%"
         query = query.where(
-            (Car.model.ilike(search_car_model)) | (Car.plate.ilike(search_car_model))
+            (Car.model.ilike(search_filter)) | (Car.plate.ilike(search_filter) | (Car.color.ilike(search_filter)))
         )
 
-    if is_active is not None:
-        query = query.where(Car.is_available == is_active)
+
+    if price_min is not None:
+        query = query.where(Car.price >= price_min)
+
+    if price_max is not None:
+        query = query.where(Car.price <= price_max)
 
     result = await db.execute(query)
 
