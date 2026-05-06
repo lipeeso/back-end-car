@@ -132,6 +132,8 @@ async def list_cars(
     owner_id: Optional[int] = Query(None, description="Filter by owner ID"),
     fuel_type: Optional[FuelType] = Query(None, description="Filter by fuel type"),
     transmission_type: Optional[TransmissionType] = Query(None, description="Filter by transmission type"),
+    model_year_min: Optional[int] = Query(None, description="Minimum model year"),
+    model_year_max: Optional[int] = Query(None, description="Maximum model year"),
     price_min: Optional[float] = Query(None, ge=0, description="Minimum price"),
     price_max: Optional[float] = Query(None, ge=0, description="Maximum price"),
 ):
@@ -160,6 +162,11 @@ async def list_cars(
             (Car.model.ilike(search_filter)) | (Car.plate.ilike(search_filter) | (Car.color.ilike(search_filter)))
         )
 
+    if model_year_min is not None:
+        query = query.where(Car.model_year >= model_year_min)
+
+    if model_year_max is not None:
+        query = query.where(Car.model_year <= model_year_max)
 
     if price_min is not None:
         query = query.where(Car.price >= price_min)
