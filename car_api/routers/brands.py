@@ -131,12 +131,6 @@ async def update_brand(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail='Brand name already exists'
             )
-        
-    if "description" in brand_update:
-        brand.description = brand_update["description"]
-
-    if "is_active" in brand_update:
-        brand.is_active = brand_update["is_active"]
 
     for key, value in brand_update.items():
         setattr(brand, key, value)
