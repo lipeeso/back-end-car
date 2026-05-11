@@ -9,3 +9,6 @@ class Settings(BaseSettings):   #-> Vai carregar todas as variaveis de ambientes
     )
 
     DATABASE_URL: str
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str  = 'HS256'
+    JWT_EXPIRATION_MINUTES: int = 30
