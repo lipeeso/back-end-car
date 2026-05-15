@@ -24,8 +24,8 @@ def create_access_token(data:Dict)-> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_EXPIRATION_MINUTES)
     to_encode.update({'exp': expire})
     encoded_jwt = jwt.encode(
-        to_encode, 
-        settings.JWT_SECRET_KEY,
+        payload=to_encode, 
+        key=settings.JWT_SECRET_KEY,
         algorithm=settings.JWT_ALGORITHM
     )
     
