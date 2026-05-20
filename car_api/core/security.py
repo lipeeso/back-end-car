@@ -3,13 +3,16 @@ from sqlalchemy import select
 from typing import Dict, Optional
 
 from pwdlib import PasswordHash
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 import jwt
 
 from car_api.models.users import User   
 from car_api.core.settings import Settings
+from car_api.core.database import get_session
 
+security = HTTPBearer()
 settings = Settings()
 
 pwd_context = PasswordHash.recommended()
@@ -17,7 +20,7 @@ pwd_context = PasswordHash.recommended()
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-'''Authentication for users'''
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -75,4 +78,46 @@ async def authenticate_user(
     if not verify_password(password, user.password):
         return None 
     
+    return user
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_session)
+)-> User:
+    
+    payload = verify_token(credentials.credentials)
+
+    user_id_str = payload.get('sub')
+
+    if not user_id_str:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid token: missing user ID',
+            headers={'WWW-Authenticate': 'Bearer'},
+        )
+    
+    try:
+
+        user_id = int(user_id_str)
+    
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid token: user ID must be an integer',
+            headers={'WWW-Authenticate': 'Bearer'},
+        )
+
+    result = await db.execute(
+        select(User).where(User.id == user_id)
+    )
+        
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='User not found',
+            headers={'WWW-Authenticate': 'Bearer'},
+        )
+
     return user
