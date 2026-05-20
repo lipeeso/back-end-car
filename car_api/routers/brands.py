@@ -69,7 +69,7 @@ async def list_brands(
     if is_active is not None:
         query = query.where(Brand.is_active == is_active)
 
-    query.offset(offset).limit(limit)
+    query = query.offset(offset).limit(limit)
     result = await db.execute(query)
     brands = result.scalars().all()
 

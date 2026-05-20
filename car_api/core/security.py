@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta, timezone
+from sqlalchemy import select
 from typing import Dict, Optional
 
 from pwdlib import PasswordHash
 from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 import jwt
 
-
+from car_api.models.users import User   
 from car_api.core.settings import Settings
 
 settings = Settings()
@@ -57,3 +59,20 @@ def verify_token(token:str)-> Dict:
             detail='Invalid token',
             headers={'WWW-Authenticate': 'Bearer'},
         )
+    
+async def authenticate_user(
+    email: str, password: str, db: AsyncSession
+    ) -> Optional[User]:
+
+    result = await db.execute(
+        select(User).where(User.email == email)
+    )
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return None
+
+    if not verify_password(password, user.password):
+        return None 
+    
+    return user
