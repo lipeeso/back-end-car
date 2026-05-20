@@ -38,6 +38,24 @@ def create_access_token(data:Dict)-> str:
     
     return encoded_jwt
 
+    
+async def authenticate_user(
+    email: str, password: str, db: AsyncSession
+    ) -> Optional[User]:
+
+    result = await db.execute(
+        select(User).where(User.email == email)
+    )
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return None
+
+    if not verify_password(password, user.password):
+        return None 
+    
+    return user
+
 def verify_token(token:str)-> Dict:
     try:
 
@@ -62,23 +80,6 @@ def verify_token(token:str)-> Dict:
             detail='Invalid token',
             headers={'WWW-Authenticate': 'Bearer'},
         )
-    
-async def authenticate_user(
-    email: str, password: str, db: AsyncSession
-    ) -> Optional[User]:
-
-    result = await db.execute(
-        select(User).where(User.email == email)
-    )
-    user = result.scalar_one_or_none()
-
-    if not user:
-        return None
-
-    if not verify_password(password, user.password):
-        return None 
-    
-    return user
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
@@ -110,7 +111,7 @@ async def get_current_user(
     result = await db.execute(
         select(User).where(User.id == user_id)
     )
-        
+
     user = result.scalar_one_or_none()
 
     if not user:
