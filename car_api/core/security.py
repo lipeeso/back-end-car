@@ -14,7 +14,6 @@ from car_api.core.database import get_session
 
 security = HTTPBearer()
 settings = Settings()
-
 pwd_context = PasswordHash.recommended()
 
 def get_password_hash(password: str) -> str:
@@ -122,3 +121,11 @@ async def get_current_user(
         )
 
     return user
+
+def verify_car_ownership(user: User, car_owner_id: int)-> None:
+    if user.id != car_owner_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You do not have permission to access this resource',
+        )
+     
