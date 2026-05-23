@@ -2,8 +2,11 @@ from fastapi import FastAPI, status
 from car_api.routers import users
 from car_api.routers import brands
 from car_api.routers import cars
+from car_api.routers import auth
 
 app = FastAPI()
+
+app.include_router(router=auth.router, prefix="/api/v1/auth", tags=["auth"])
 
 app.include_router(router=users.router, prefix="/api/v1/users", tags=["users"])
 
