@@ -4,6 +4,10 @@ from sqlalchemy import select, exists, func
 from sqlalchemy.orm import selectinload #-> Faz carregamento de dados de outras tabelas
 from typing import List, Optional
 
+from car_api.core.security import (
+    get_current_user,
+    verify_car_ownership
+)
 from car_api.core.database import get_session   
 from car_api.models.cars import Car, Brand, FuelType, TransmissionType
 from car_api.models.users import User
@@ -25,6 +29,7 @@ router = APIRouter()
 )
 async def create_car(
     car: CarSchema,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     
@@ -97,6 +102,7 @@ async def create_car(
 )
 async def get_car(
     car_id: int,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     result = await db.execute(
@@ -113,6 +119,8 @@ async def get_car(
             detail="Car not found"
         )
 
+    verify_car_ownership(current_user, car.owner_id)
+
     return car
 
 
@@ -123,7 +131,6 @@ async def get_car(
     summary='Get a list of cars'
 )
 async def list_cars(
-    db: AsyncSession = Depends(get_session),
     offset: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(10, ge=1, le=100, description="Maximum number of items to return"),
     search: Optional[str] = Query(None, description="Search term for model or color"),
@@ -136,6 +143,8 @@ async def list_cars(
     model_year_max: Optional[int] = Query(None, description="Maximum model year"),
     price_min: Optional[float] = Query(None, ge=0, description="Minimum price"),
     price_max: Optional[float] = Query(None, ge=0, description="Maximum price"),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
 ):
     query = select(Car).options(selectinload(Car.brand), selectinload(Car.owner))
 
@@ -194,6 +203,7 @@ async def list_cars(
 async def update_car(
     car_id: int,
     car_update: CarUpdateSchema,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     car = await db.get(Car, car_id)
@@ -203,6 +213,8 @@ async def update_car(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Car not found"
         )
+    
+    verify_car_ownership(current_user, car.owner_id)
     
     car_update_data = car_update.model_dump(exclude_unset=True)
 
@@ -264,6 +276,7 @@ async def update_car(
 )
 async def delete_car(
     car_id: int,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     car = await db.get(Car, car_id)
@@ -273,6 +286,8 @@ async def delete_car(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Car not found"
         )
+    
+    verify_car_ownership(current_user, car.owner_id)
 
     await db.delete(car)
     await db.commit()

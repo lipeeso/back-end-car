@@ -2,7 +2,9 @@ from fastapi import APIRouter, status, HTTPException, Query, Depends
 from typing import List, Optional
 from car_api.core.database import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
+from car_api.core.security import get_current_user
 from car_api.models.cars import Brand, Car
+from car_api.models.users import User
 from sqlalchemy import select, exists, func
 from car_api.schemas.brands import(
     BrandListPublicSchema,
@@ -21,6 +23,7 @@ router = APIRouter()
 )
 async def create_brand(
     brand: BrandSchema,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     brand_exists = await db.scalar(
@@ -57,6 +60,7 @@ async def list_brands(
     limit: int = Query(100, ge=1, le=100, description="Maximum number of items"),
     search: Optional[str] = Query(None, description="Search term for brand name"),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ):
 
@@ -84,6 +88,7 @@ async def list_brands(
 )
 async def get_brand(
     brand_id: int,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     brand = await db.get(Brand, brand_id)
@@ -105,6 +110,7 @@ async def get_brand(
 async def update_brand(
     brand_id: int,
     brand_update: BrandUpdateSchema,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     brand = await db.get(Brand, brand_id)
@@ -147,6 +153,7 @@ async def update_brand(
 )
 async def delete_brand(
     brand_id: int,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     brand = await db.get(Brand, brand_id)
