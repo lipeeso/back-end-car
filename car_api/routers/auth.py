@@ -44,3 +44,22 @@ async def token(
         "access_token": access_token,
         "token_type": "bearer"
     }
+
+
+@router.post(
+    path="/refresh_token",
+    response_model=Token,
+    status_code=status.HTTP_200_OK,
+    summary="Refresh access token"
+)
+async def refresh_token(
+    current_user: User = Depends(get_current_user)
+):
+    access_token = create_access_token(
+        data={'sub': str(current_user.id)}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
