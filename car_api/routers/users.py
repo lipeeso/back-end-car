@@ -66,6 +66,7 @@ async def list_users(
     offset: int = Query(0, ge=0, description='Number of items to skip'),
     limit: int = Query(100, ge=1, le=100, description='Maximum number of items to return'),
     search: Optional[str] = Query(None, description='Search term for username or email'),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
     
 ):  
@@ -97,6 +98,7 @@ async def list_users(
 )
 async def get_user(
     user_id: int,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     user = await db.get(User, user_id)
