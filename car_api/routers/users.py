@@ -1,4 +1,3 @@
-from unittest import result
 from typing import Optional
 from fastapi import APIRouter, status, HTTPException, Query, Depends
 from car_api.core.database import get_session
