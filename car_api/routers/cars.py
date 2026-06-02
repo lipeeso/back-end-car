@@ -193,6 +193,38 @@ async def list_cars(
         "limit": limit,
     }
 
+@router.get(
+    path='/{user_id}/cars',
+    status_code=status.HTTP_200_OK,
+    response_model=CarListSchema,
+    summary='Get a list of cars owned by the current user'
+)
+async def list_cars_user(
+    user_id: int,
+    offset: int = Query(0, ge=0, description="Number of items to skip"),
+    limit: int = Query(10, ge=1, le=100, description="Maximum number of items to return"),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to view cars of this user"
+        )
+
+    query = select(Car).options(selectinload(Car.brand), selectinload(Car.owner)).where(Car.owner_id == user_id)
+    query = query.offset(offset).limit(limit)
+
+    result = await db.execute(query)
+
+    cars = result.scalars().all()
+
+    return {
+        "cars": cars,
+        "offset": offset,
+        "limit": limit,
+    }
+
 
 @router.put(
     path='/{car_id}',
