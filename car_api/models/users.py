@@ -22,6 +22,4 @@ class User(Base):
     )
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
-    cars: Mapped[List['Car']] = relationship(
-        'Car', back_populates='owner'
-    )  # -> define o relacionamento com a tabela cars, e o back_populates para definir o nome do atributo na classe Car
+    cars: Mapped[List['Car']] = relationship('Car', back_populates='owner')

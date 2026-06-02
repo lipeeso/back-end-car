@@ -80,7 +80,6 @@ async def create_car(
     await db.commit()
     await db.refresh(db_car)
 
-    """Options serve para os extras que não estão na tabela, mas são relacionados a ela, como o brand e o owner """
     result = await db.execute(
         select(Car)
         .options(selectinload(Car.brand), selectinload(Car.owner))

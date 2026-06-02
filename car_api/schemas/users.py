@@ -3,8 +3,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
-"""Para diferentes use cases podemos criar diferentes schemas, por exemplo, para criar um usuário, atualizar um usuário, etc."""
-
 
 class UserSchema(BaseModel):
     username: str
@@ -47,9 +45,7 @@ class UserUpdateSchema(BaseModel):
 
 
 class UserPublicSchema(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True
-    )  # esse schema pode ser criado lendo atributos de um objeto, não só chaves de um dicionário. permite converter objetos ORM/classes em schema de resposta.
+    model_config = ConfigDict(from_attributes=True)
     id: int
     username: str
     email: EmailStr

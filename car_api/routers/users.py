@@ -89,8 +89,7 @@ async def list_users(
         limit
     )  # -> Aplica o deslocamento e o limite à consulta SQLAlchemy.
     result = await db.execute(query)
-    users = result.scalars().all()  # -> All retorna uma lista de objetos do tipo User, e scalars() extrai apenas os objetos User da consulta SQLAlchemy.
-
+    users = result.scalars().all()
     return {
         'users': users,
         'offset': offset,
@@ -139,9 +138,7 @@ async def update_user(
             status_code=status.HTTP_404_NOT_FOUND, detail='User not found'
         )
 
-    update_data = user_update.model_dump(
-        exclude_unset=True
-    )  # -> Transforma o objeto UserUpdateSchema em um dicionário, excluindo os campos que não foram definidos (unset).
+    update_data = user_update.model_dump(exclude_unset=True)
 
     if 'username' in update_data and update_data['username'] != user.username:
         user_exists = await db.scalar(
@@ -176,9 +173,7 @@ async def update_user(
         update_data['password'] = get_password_hash(update_data['password'])
 
     for field, value in update_data.items():
-        setattr(
-            user, field, value
-        )  # -> Atualiza os campos do objeto User com os valores fornecidos na solicitação de atualização.
+        setattr(user, field, value)
 
     await db.commit()
     await db.refresh(user)

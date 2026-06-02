@@ -33,9 +33,7 @@ class Brand(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    name: Mapped[str] = mapped_column(
-        String(50), unique=True
-    )  # -> define o limite de caracter a 50 e o unique para não permitir repetição
+    name: Mapped[str] = mapped_column(String(50), unique=True)
     is_active: Mapped[bool] = mapped_column(
         default=True
     )  # -> define o valor padrão como True
@@ -48,9 +46,7 @@ class Brand(Base):
     )
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
-    cars: Mapped[List['Car']] = relationship(
-        'Car', back_populates='brand'
-    )  # -> define o relacionamento com a tabela cars, e o back_populates para definir o nome do atributo na classe Car
+    cars: Mapped[List['Car']] = relationship('Car', back_populates='brand')
 
 
 class Car(Base):
@@ -58,48 +54,31 @@ class Car(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    model: Mapped[str] = mapped_column(
-        String(100)
-    )  # -> define o limite de caracter a 100
-    factory_year: Mapped[int] = mapped_column(
-        Integer
-    )  # -> define o tipo como inteiro
+    model: Mapped[str] = mapped_column(String(100))
+    factory_year: Mapped[int] = mapped_column(Integer)
     model_year: Mapped[int] = mapped_column(Integer)
     color: Mapped[str] = mapped_column(String(25))
-    plate: Mapped[str] = mapped_column(
-        String(10), unique=True, index=True
-    )  # -> index=True para criar um índice no campo, o que melhora a performance nas querys
+    plate: Mapped[str] = mapped_column(String(10), unique=True, index=True)
 
     fuel_type: Mapped[FuelType] = mapped_column(String(20))
-    transmission: Mapped[TransmissionType] = mapped_column(
-        String(20)
-    )  # -> define o tipo como string com limite de 20 caracteres, e o tipo é o enum TransmissionType
+    transmission: Mapped[TransmissionType] = mapped_column(String(20))
 
-    price: Mapped[Decimal] = mapped_column(
-        Numeric(10, 2)
-    )  # -> define o tipo como decimal com 10 dígitos no total e 2 casas decimais
+    price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     description: Mapped[Optional[str]] = mapped_column(Text, default=None)
     is_available: Mapped[bool] = mapped_column(default=True)
 
-    brand_id: Mapped[int] = mapped_column(
-        ForeignKey('brands.id')
-    )  # -> define a chave estrangeira para a tabela brands
-    owner_id: Mapped[int] = mapped_column(
-        ForeignKey('users.id')
-    )  # -> define a chave estrangeira para a tabela owners
-
+    brand_id: Mapped[int] = mapped_column(ForeignKey('brands.id'))
+    owner_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     updated_at: Mapped[datetime] = mapped_column(
         onupdate=func.now(), server_default=func.now()
     )
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     # Propriedades de relacionamento
-    """
-    Facilita o acesso aos dados relacionados, permitindo que você acesse os dados da marca e do proprietário diretamente a partir do objeto Car, sem precisar fazer uma consulta separada para obter essas informações.
-    """
+
     brand: Mapped['Brand'] = relationship(
         'Brand', back_populates='cars'
-    )  # -> define o relacionamento com a tabela brands, e o back_populates para definir o nome do atributo na classe Brand
+    )  # -> define o relacionamento com a tabela brands
     owner: Mapped['User'] = relationship(
         'User', back_populates='cars'
-    )  # -> define o relacionamento com a tabela users, e o back_populates para definir o nome do atributo na classe User
+    )  # -> define o relacionamento com a tabela users
