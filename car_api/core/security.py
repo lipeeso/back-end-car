@@ -1,20 +1,21 @@
 from datetime import datetime, timedelta, timezone
-from sqlalchemy import select
 from typing import Dict, Optional
 
-from pwdlib import PasswordHash
-from fastapi import HTTPException, status, Depends
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.ext.asyncio import AsyncSession
 import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pwdlib import PasswordHash
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from car_api.models.users import User   
-from car_api.core.settings import Settings
 from car_api.core.database import get_session
+from car_api.core.settings import Settings
+from car_api.models.users import User
 
 security = HTTPBearer()
 settings = Settings()
 pwd_context = PasswordHash.recommended()
+
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
@@ -24,55 +25,55 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def create_access_token(data:Dict)-> str:
+def create_access_token(data: Dict) -> str:
 
-    to_encode =  data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_EXPIRATION_MINUTES)
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(
+        minutes=settings.JWT_EXPIRATION_MINUTES
+    )
     to_encode.update({'exp': expire})
     encoded_jwt = jwt.encode(
-        payload=to_encode, 
+        payload=to_encode,
         key=settings.JWT_SECRET_KEY,
-        algorithm=settings.JWT_ALGORITHM
+        algorithm=settings.JWT_ALGORITHM,
     )
-    
+
     return encoded_jwt
 
-    
+
 async def authenticate_user(
     email: str, password: str, db: AsyncSession
-    ) -> Optional[User]:
+) -> Optional[User]:
 
-    result = await db.execute(
-        select(User).where(User.email == email)
-    )
+    result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
 
     if not user:
         return None
 
     if not verify_password(password, user.password):
-        return None 
-    
+        return None
+
     return user
 
-def verify_token(token:str)-> Dict:
-    try:
 
+def verify_token(token: str) -> Dict:
+    try:
         payload = jwt.decode(
             jwt=token,
             key=settings.JWT_SECRET_KEY,
-            algorithms=[settings.JWT_ALGORITHM]
+            algorithms=[settings.JWT_ALGORITHM],
         )
 
         return payload
-    
+
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Token has expired',
             headers={'WWW-Authenticate': 'Bearer'},
         )
-    
+
     except jwt.InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -80,11 +81,12 @@ def verify_token(token:str)-> Dict:
             headers={'WWW-Authenticate': 'Bearer'},
         )
 
+
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: AsyncSession = Depends(get_session)
-)-> User:
-    
+    db: AsyncSession = Depends(get_session),
+) -> User:
+
     payload = verify_token(credentials.credentials)
 
     user_id_str = payload.get('sub')
@@ -95,11 +97,10 @@ async def get_current_user(
             detail='Invalid token: missing user ID',
             headers={'WWW-Authenticate': 'Bearer'},
         )
-    
-    try:
 
+    try:
         user_id = int(user_id_str)
-    
+
     except (ValueError, TypeError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -107,9 +108,7 @@ async def get_current_user(
             headers={'WWW-Authenticate': 'Bearer'},
         )
 
-    result = await db.execute(
-        select(User).where(User.id == user_id)
-    )
+    result = await db.execute(select(User).where(User.id == user_id))
 
     user = result.scalar_one_or_none()
 
@@ -122,10 +121,10 @@ async def get_current_user(
 
     return user
 
-def verify_car_ownership(user: User, car_owner_id: int)-> None:
+
+def verify_car_ownership(user: User, car_owner_id: int) -> None:
     if user.id != car_owner_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='You do not have permission to access this resource',
         )
-     

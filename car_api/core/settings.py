@@ -1,14 +1,17 @@
-'''Configurações globais
-OBS -> UTF-8 é para não quebrar em caracteres especiais'''
+"""Configurações globais
+OBS -> UTF-8 é para não quebrar em caracteres especiais"""
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):   #-> Vai carregar todas as variaveis de ambientes do projeto
+class Settings(
+    BaseSettings
+):  # -> Vai carregar todas as variaveis de ambientes do projeto
     model_config = SettingsConfigDict(
         env_file='.env', env_file_encoding='utf-8'
     )
 
     DATABASE_URL: str
     JWT_SECRET_KEY: str
-    JWT_ALGORITHM: str  = 'HS256'
+    JWT_ALGORITHM: str = 'HS256'
     JWT_EXPIRATION_MINUTES: int = 30
