@@ -9,12 +9,27 @@ theme:
   font:
     text: Roboto
 
-plugins:
-  - search #Deixa a busca mais dinâmica 
+nav:
+  - Início: index.md
+  - Pré-requisitos: prerequisites.md
+  - Instalação: installation.md
+  - Configuração: configuration.md
+  - Guidelines e padrões: guidelines.md
+  - Estrutura do Projeto: structure.md
+  - Modelagem do Sistema: modeling.md
+  - API Endpoints: endpoints.md
+  - Autenticação e Segurança: authentication.md
+  - Desenvolvimento: development.md
+  - Testes: testing.md
+  - Deploy: deployment.md
+  - Contribuição: contribution.md
+  - Release Notes: release_notes.md
 
-markdown_extensions: # configurações do Markdown para utilizar extensão
-  - pymdownx.superfences: #extensão que vai permitir a utilização de blocos de código com sintaxe específica, como o Mermaid
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
-          
