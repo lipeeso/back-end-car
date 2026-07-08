@@ -1,1 +1,20 @@
 site_name: Car API
+site_description: Uma API REST completa para gerenciamento de carros e usuários
+site_author: Felipe
+
+theme: 
+  name: material
+  palette:
+    primary: teal
+  font:
+    text: Roboto
+
+plugins:
+  - search #Deixa a busca mais dinâmica 
+
+markdown_extensions: # configurações do Markdown para utilizar extensão
+  - pymdownx.superfences: #extensão que vai permitir a utilização de blocos de código com sintaxe específica, como o Mermaid
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          
