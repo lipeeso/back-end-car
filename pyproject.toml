@@ -29,7 +29,8 @@ build-backend = "poetry.core.masonry.api"
 [dependency-groups]
 dev = [
     "ruff (>=0.15.15,<0.16.0)",
-    "taskipy (>=1.14.1,<2.0.0)"
+    "taskipy (>=1.14.1,<2.0.0)",
+    "pytest-asyncio (>=1.4.0,<2.0.0)"
 ]
 
 
@@ -76,6 +77,15 @@ ignore = ['PLR2004', 'PLR0917', 'PLR0913']
 [tool.ruff.format]
 preview = true
 quote-style = 'single'
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = '-p no:warnings'
+asyncio_default_fixture_loop_scope = 'function'
+
+[tool.coverage.run]
+concurrency = ["thread", "greenlet"]
+
 
 [tool.taskipy.tasks]
 lint = 'ruff check'
