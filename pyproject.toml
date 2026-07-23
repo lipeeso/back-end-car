@@ -85,7 +85,7 @@ addopts = '-p no:warnings'
 asyncio_default_fixture_loop_scope = 'function' 
 
 [tool.coverage.run]
-concurrency = ["thread", "greenlet"] # -> monitorar execução concorrente 
+concurrency = ["thread", "greenlet"] 
 
 
 [tool.taskipy.tasks]
