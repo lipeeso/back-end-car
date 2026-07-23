@@ -79,12 +79,12 @@ ignore = ['PLR2004', 'PLR0917', 'PLR0913']
 preview = true
 quote-style = 'single'
                                                                                                                                                                                                                                                 
-[tool.pytest.ini_options]  # -> tool é uma sessão de configuração da biblioteca
-pythonpath = "."    # -> path do python
-addopts = '-p no:warnings' # -> ignora os warnings e mostra apenas os erros
-asyncio_default_fixture_loop_scope = 'function' # -> define o escopo de função
+[tool.pytest.ini_options]
+pythonpath = "."    
+addopts = '-p no:warnings' 
+asyncio_default_fixture_loop_scope = 'function' 
 
-[tool.coverage.run] #-> sessão de coverage cobertura de teste 
+[tool.coverage.run]
 concurrency = ["thread", "greenlet"] # -> monitorar execução concorrente 
 
 
