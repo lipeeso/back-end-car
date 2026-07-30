@@ -8,7 +8,7 @@ from car_api.models import User
 async def test_create_user(session):
 
     new_user = User(
-        username='testuser', password='testpassword', email='test@example.com'
+        username='testuser', password='secret123', email='test@example.com'
     )
 
     session.add(new_user)
@@ -28,6 +28,6 @@ async def test_create_user(session):
     assert user_data == {
         'id': 1,
         'username': 'testuser',
-        'password': 'testpassword',
+        'password': 'secret123',
         'email': 'test@example.com',
     }
