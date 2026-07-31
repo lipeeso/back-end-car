@@ -78,6 +78,7 @@ async def second_user(session):
     await session.refresh(db_user)
     return db_user
 
+
 @pytest_asyncio.fixture
 async def third_user(session):
     hashed_password = get_password_hash('secret789')
@@ -92,6 +93,7 @@ async def third_user(session):
     await session.commit()
     await session.refresh(db_user)
     return db_user
+
 
 @pytest.fixture
 def access_token(user):
