@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from car_api.app import app
 from car_api.core.database import get_session
-from car_api.core.security import get_password_hash
+from car_api.core.security import create_access_token, get_password_hash
 from car_api.models import Base, User
 
 
@@ -38,12 +38,12 @@ def client(session):
     app.dependency_overrides.clear()
 
 
-@pytest_asyncio.fixture
-async def user_data():
+@pytest.fixture
+def user_data():
     return {
         'username': 'testuser',
-        'email': 'test@example.com',
         'password': 'secret123',
+        'email': 'test@example.com',
     }
 
 
@@ -59,5 +59,46 @@ async def user(session, user_data):
 
     session.add(db_user)
     await session.commit()
+    await session.refresh(db_user)  # atualiza o obj
+    return db_user
+
+
+@pytest_asyncio.fixture
+async def second_user(session):
+    hashed_password = get_password_hash('secret456')
+
+    db_user = User(
+        username='testuser2',
+        password=hashed_password,
+        email='test2@example.com',
+    )
+
+    session.add(db_user)
+    await session.commit()
     await session.refresh(db_user)
     return db_user
+
+@pytest_asyncio.fixture
+async def third_user(session):
+    hashed_password = get_password_hash('secret789')
+
+    db_user = User(
+        username='testuser3',
+        password=hashed_password,
+        email='test3@example.com',
+    )
+
+    session.add(db_user)
+    await session.commit()
+    await session.refresh(db_user)
+    return db_user
+
+@pytest.fixture
+def access_token(user):
+    token = create_access_token({'sub': str(user.id)})
+    return token
+
+
+@pytest.fixture
+def auth_headers(access_token):
+    return {'Authorization': f'Bearer {access_token}'}
