@@ -102,7 +102,7 @@ def test_update_user(client, user, auth_headers):
         f'/api/v1/users/{user.id}', json=update_data, headers=auth_headers
     )
 
-    assert response.status_code == HTTPStatus.CREATED
+    assert response.status_code == HTTPStatus.OK
     data = response.json()
     assert data['username'] == 'updateduser'
     assert data['email'] == 'updated@example.com'
@@ -115,7 +115,7 @@ def test_update_user_password(client, user, auth_headers):
         f'/api/v1/users/{user.id}', json=update_data, headers=auth_headers
     )
 
-    assert response.status_code == HTTPStatus.CREATED
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_update_user_not_found(client, auth_headers):

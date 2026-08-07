@@ -120,7 +120,7 @@ async def get_user(
 
 @router.put(
     path='/{user_id}',
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     response_model=UserPublicSchema,
     summary='Update a user by ID',
 )

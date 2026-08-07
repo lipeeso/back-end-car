@@ -38,8 +38,8 @@ def client(session):
     app.dependency_overrides.clear()
 
 
-@pytest.fixture
-def user_data():
+@pytest_asyncio.fixture
+async def user_data():
     return {
         'username': 'testuser',
         'password': 'secret123',
@@ -116,8 +116,8 @@ def second_user_auth_headers(second_user_token):
     return {'Authorization': f'Bearer {second_user_token}'}
 
 
-@pytest.fixture
-def brand_data():
+@pytest_asyncio.fixture
+async def brand_data():
     return {
         'name': 'Toyota',
         'description': 'Japanese automaker',
@@ -153,8 +153,8 @@ async def second_brand(session):
     return db_brand
 
 
-@pytest.fixture
-def car_data(brand, user):
+@pytest_asyncio.fixture
+async def car_data(brand, user):
     return {
         'model': 'Corolla',
         'factory_year': 2023,
