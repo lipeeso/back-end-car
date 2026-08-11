@@ -1,7 +1,4 @@
-import asyncio
 from http import HTTPStatus
-
-from car_api.models import Car
 
 
 def test_create_car(client, car_data, auth_headers):
@@ -251,23 +248,8 @@ def test_update_car_not_owner(client, car, second_user_auth_headers):
 
 
 def test_update_car_duplicate_plate(
-    client, car, brand, user, auth_headers, session
+    client, car, second_car, brand, user, auth_headers
 ):
-    other_car = Car(
-        model='Civic',
-        factory_year=2023,
-        model_year=2024,
-        color='Black',
-        plate='XYZ9W99',
-        fuel_type='flex',
-        transmission='automatic',
-        price=120000.00,
-        brand_id=brand.id,
-        owner_id=user.id,
-    )
-    session.add(other_car)
-
-    asyncio.get_event_loop().run_until_complete(session.commit())
 
     update_data = {'plate': 'XYZ9W99'}
 

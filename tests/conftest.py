@@ -192,3 +192,24 @@ async def car(session, brand, user):
     await session.commit()
     await session.refresh(db_car)
     return db_car
+
+
+@pytest_asyncio.fixture
+async def second_car(session, second_brand, user):
+    db_car = Car(
+        model='Civic',
+        factory_year=2023,
+        model_year=2024,
+        color='Black',
+        plate='XYZ9W99',
+        fuel_type='flex',
+        transmission='automatic',
+        price=120000.00,
+        brand_id=second_brand.id,
+        owner_id=user.id,
+    )
+
+    session.add(db_car)
+    await session.commit()
+    await session.refresh(db_car)
+    return db_car
