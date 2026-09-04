@@ -93,7 +93,7 @@ concurrency = ["thread", "greenlet"]
 lint = 'ruff check'
 pre_format = 'ruff check --fix'
 format = 'ruff format'
-run = 'fastapi dev car_api/app.py'
+run = 'fastapi dev car_api/app.py --host 0.0.0.0'
 pre_test = 'task lint'
 test = 'pytest -s -x --cov=car_api -vv'
 post_test = 'coverage html'
