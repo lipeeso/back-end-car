@@ -1,6 +1,7 @@
 # Usa a imagem base do Python 3.13.11 para o ambiente da aplicação.
 FROM python:3.13-alpine3.24
 
+#Se algum comando do pipe falhar, o shell retornará um erro e o processo será interrompido.
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 # Define a versão do Poetry que será instalada no container.
@@ -20,7 +21,7 @@ WORKDIR /app
 COPY . .
 
 # Instala as dependências do projeto com Poetry.
-RUN poetry install
+RUN poetry install --without dev
 
 # Executa a aplicação pela tarefa definida no projeto.
-CMD ["poetry", "run", "task", "run"]
+CMD ["poetry", "run", "fastapi", "dev", "car_api/app.py", "--host", "0.0.0.0"]
