@@ -10,6 +10,8 @@ COPY --chown=${USERNAME}:${USERNAME} requirements_docs.txt .
 
 RUN pip install --no-cache-dir -r requirements_docs.txt
 
+USER ${USERNAME}
+
 COPY --chown=${USERNAME}:${USERNAME} . .
 
 RUN mkdocs build 
