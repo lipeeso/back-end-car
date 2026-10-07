@@ -1,0 +1,15 @@
+FROM python:3.13-alpine3.24
+
+ARG USERNAME=carapi
+
+RUN adduser -s /bin/sh -D ${USERNAME}
+
+WORKDIR /home/${USERNAME}/app
+
+COPY --chown=${USERNAME}:${USERNAME} requirements_docs.txt .
+
+RUN pip install --no-cache-dir -r requirements_docs.txt
+
+COPY --chown=${USERNAME}:${USERNAME} . .
+
+RUN mkdocs build 

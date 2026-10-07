@@ -16,7 +16,7 @@ USER ${USERNAME}
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
-WORKDIR /home/${USERNAME}
+WORKDIR /home/${USERNAME}/app
 
 # Instala as dependências do projeto com Poetry.
 COPY --chown=${USERNAME}:${USERNAME} pyproject.toml poetry.lock ./
