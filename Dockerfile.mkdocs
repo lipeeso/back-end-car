@@ -1,17 +1,17 @@
-FROM python:3.13-alpine3.24
+FROM python:3.13-alpine3.24 AS builder
 
-ARG USERNAME=carapi
+WORKDIR /app
 
-RUN adduser -s /bin/sh -D ${USERNAME}
+COPY requirements_docs.txt .
 
-WORKDIR /home/${USERNAME}/app
+RUN pip install -r requirements_docs.txt
 
-COPY --chown=${USERNAME}:${USERNAME} requirements_docs.txt .
-
-RUN pip install --no-cache-dir -r requirements_docs.txt
-
-USER ${USERNAME}
-
-COPY --chown=${USERNAME}:${USERNAME} . .
+COPY . .
 
 RUN mkdocs build 
+
+FROM nginx:1.31 AS runtime
+
+COPY --from=builder /app/site /usr/share/nginx/html
+
+CMD ["nginx", "-g", "daemon off;"]
