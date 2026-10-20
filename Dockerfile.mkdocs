@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY requirements_docs.txt .
 
-RUN pip install -r requirements_docs.txt
+RUN pip install --no-cache-dir -r requirements_docs.txt
 
 COPY . .
 
