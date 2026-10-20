@@ -1,20 +1,18 @@
-version: '3.8'
+version: "5.5.1"
 
 services:
   app:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     env_file:
       - .env
-    ports:
+    ports: 
       - "8000:8000"
 
   docs:
     build:
-      context: .
+      context: . 
       dockerfile: Dockerfile.mkdocs
     ports:
-     - "8001:80"
-
-
+      - "8001:80"
