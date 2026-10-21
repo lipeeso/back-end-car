@@ -1,5 +1,3 @@
-version: "5.5.1"
-
 services:
   app:
     build:
@@ -9,10 +7,11 @@ services:
       - .env
     ports: 
       - "8000:8000"
-
-  docs:
+  
+  mkdocs:
     build:
-      context: . 
+      context: .
       dockerfile: Dockerfile.mkdocs
     ports:
       - "8001:80"
+    
