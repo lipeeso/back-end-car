@@ -8,31 +8,35 @@ services:
         condition: service_completed_successfully
     env_file:
       - .env
-    ports: 
+    ports:
       - "8000:8000"
+  
   migrations:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file:
-      - .env
-    command: poetry run alembic upgrade head
     depends_on:
-      - db
+      - db  
+    env_file:
+      - .env 
+    command: poetry run alembic upgrade head
+
   db:
-    image: postgres:17-trixie
+    image: postgres:17.11-trixie
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - data:/var/lib/postgresql/data
+    
   mkdocs:
     build:
       context: .
       dockerfile: Dockerfile.mkdocs
     ports:
       - "8001:80"
-    
+
 volumes:
   data:
+     
